@@ -1,0 +1,48 @@
+{% extends "app.html" %}
+{% import "macros.html" as ui %}
+{% block title %}My loans{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>My loans</h1><p>{{ active|length }} of {{ MAX_LOANS }} borrowing slots in use · Rs {{ fines }} paid in late fines so far</p></div>
+  <a class="btn" href="{{ url_for('catalogue') }}">{{ ui.icon('book') }}Browse books</a>
+</div>
+
+<section class="panel">
+  <div class="panel-head"><h2>Currently borrowed<span>{{ active|length }}</span></h2></div>
+  {% for i in active %}
+  {% set s = i|loan_state %}
+  <div class="loan-card">
+    {{ ui.cover(i) }}
+    <div>
+      <h3>{{ i.title }}</h3>
+      <p>{{ i.author }}</p>
+      <div class="dates"><span>Borrowed <b>{{ i.issue_date|nice }}</b></span><span>Due <b>{{ i.due_date|nice }}</b></span>{{ ui.state(i) }}</div>
+      <div class="progress {{ s[1] }}"><i style="width:{{ i|loan_progress }}%"></i></div>
+    </div>
+    <form method="post" action="{{ url_for('member_return', issue_id=i.issue_id) }}"><button class="btn">{{ ui.icon('return') }}Return</button></form>
+  </div>
+  {% else %}
+  {{ ui.empty('You have no books right now', 'Find something to read in the catalogue.', 'bookmark') }}
+  {% endfor %}
+</section>
+
+<section class="panel">
+  <div class="panel-head"><h2>History<span>{{ history|length }}</span></h2></div>
+  {% if history %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Book</th><th>Borrowed</th><th>Returned</th><th>Status</th><th class="num">Fine (Rs)</th></tr></thead>
+    <tbody>
+    {% for i in history %}
+      <tr>
+        <td><div class="book-cell">{{ ui.cover(i, 'sm') }}<span><b>{{ i.title }}</b><small>{{ i.author }}</small></span></div></td>
+        <td class="dim nowrap">{{ i.issue_date|nice }}</td>
+        <td class="dim nowrap">{{ i.return_date|nice }}</td>
+        <td>{{ ui.state(i) }}</td>
+        <td class="num">{{ i.fine }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}{{ ui.empty('No past loans yet') }}{% endif %}
+</section>
+{% endblock %}

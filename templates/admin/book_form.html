@@ -1,0 +1,41 @@
+{% extends "app.html" %}
+{% import "macros.html" as ui %}
+{% block title %}{{ 'Edit book' if editing else 'Add book' }}{% endblock %}
+{% block content %}
+<a class="back" href="{{ url_for('books') }}">{{ ui.icon('back') }}Catalogue</a>
+<div class="page-head">
+  <div><h1>{{ 'Edit book' if editing else 'Add a book' }}</h1>
+  <p>{% if editing %}{{ book.copies|int - book.available|default(book.copies)|int }} of {{ book.copies }} copies are on loan right now.{% else %}New titles appear in the member catalogue straight away.{% endif %}</p></div>
+</div>
+
+<div class="form-layout">
+  <form class="panel" method="post">
+    <div class="form-grid">
+      <div class="f-6"><label for="title">Title</label><input id="title" name="title" value="{{ book.title if book }}" required autofocus></div>
+      <div class="f-4"><label for="author">Author(s)</label><input id="author" name="author" value="{{ book.author if book }}" required><div class="hint">Separate multiple authors with commas.</div></div>
+      <div class="f-2"><label for="year">Year</label><input id="year" name="year" inputmode="numeric" value="{{ book.year if book and book.year }}" placeholder="e.g. 2015"></div>
+      <div class="f-3"><label for="category">Subject</label><input id="category" name="category" list="cats" value="{{ book.category if book }}" placeholder="Pick or type a new one">
+        <datalist id="cats">{% for c in cats %}<option value="{{ c }}">{% endfor %}</datalist></div>
+      <div class="f-2"><label for="isbn">ISBN</label><input id="isbn" name="isbn" value="{{ book.isbn if book and book.isbn }}" placeholder="13 digits"></div>
+      <div class="f-1" style="grid-column:span 1"><label for="copies">Copies</label><input id="copies" name="copies" type="number" min="0" value="{{ book.copies if book else 1 }}" required></div>
+    </div>
+    <div class="form-foot">
+      <a class="btn" href="{{ url_for('books') }}">Cancel</a>
+      <button class="btn primary">{{ 'Save changes' if editing else 'Add to catalogue' }}</button>
+    </div>
+  </form>
+
+  <div class="preview">
+    <div class="preview-label">Cover preview</div>
+    <div class="cover" id="pv" style="--c: {{ (book.book_id if editing else 0)|cover }}"><span class="cover-t" id="pv-t">{{ book.title if book else 'Book title' }}</span><span class="cover-a" id="pv-a">{{ book.author.split(',')[0] if book and book.author else 'Author' }}</span></div>
+  </div>
+</div>
+<script>
+const t = document.getElementById('title'), a = document.getElementById('author');
+const sync = () => {
+  document.getElementById('pv-t').textContent = t.value || 'Book title';
+  document.getElementById('pv-a').textContent = (a.value.split(',')[0] || 'Author').trim();
+};
+t.addEventListener('input', sync); a.addEventListener('input', sync);
+</script>
+{% endblock %}

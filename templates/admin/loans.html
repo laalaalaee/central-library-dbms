@@ -1,0 +1,40 @@
+{% extends "app.html" %}
+{% import "macros.html" as ui %}
+{% block title %}Circulation{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Circulation</h1><p>Loan period {{ LOAN_DAYS }} days · late fine Rs {{ FINE_PER_DAY }} per day</p></div>
+  <a class="btn primary" href="{{ url_for('new_loan') }}">{{ ui.icon('swap') }}Issue a book</a>
+</div>
+
+<section class="panel">
+  <form class="toolbar" method="get">
+    <nav class="seg" aria-label="Filter loans">
+      {% for key, label in [('active','On loan'),('overdue','Overdue'),('returned','Returned'),('all','All')] %}
+      <a href="{{ url_for('loans', status=key, q=q or None) }}" class="{{ 'on' if status == key }}">{{ label }}<small>{{ counts[key] }}</small></a>
+      {% endfor %}
+    </nav>
+    <span class="spacer"></span>
+    <input type="hidden" name="status" value="{{ status }}">
+    <label class="search">{{ ui.icon('search') }}<input name="q" value="{{ q }}" placeholder="Member or book" aria-label="Search"></label>
+  </form>
+  {% if loans %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Book</th><th>Member</th><th>Issued</th><th>{{ 'Returned' if status == 'returned' else 'Due' }}</th><th>Status</th><th class="num">Fine (Rs)</th><th></th></tr></thead>
+    <tbody>
+    {% for i in loans %}
+      <tr>
+        <td><div class="book-cell">{{ ui.cover(i, 'sm') }}<span><b>{{ i.title }}</b><small>{{ i.author }}</small></span></div></td>
+        <td class="nowrap">{{ i.member }}</td>
+        <td class="dim nowrap">{{ i.issue_date|nice }}</td>
+        <td class="dim nowrap">{{ (i.return_date if status == 'returned' else i.due_date)|nice }}</td>
+        <td>{{ ui.state(i) }}</td>
+        <td class="num">{{ i.fine if i.return_date else '—' }}</td>
+        <td class="actions">{% if not i.return_date %}<form class="inline" method="post" action="{{ url_for('admin_return', issue_id=i.issue_id) }}"><button class="btn sm">{{ ui.icon('return') }}Return</button></form>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}{{ ui.empty('No loans here', 'Nothing matches this filter.', 'swap') }}{% endif %}
+</section>
+{% endblock %}

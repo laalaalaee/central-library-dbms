@@ -1,0 +1,42 @@
+{% extends "app.html" %}
+{% import "macros.html" as ui %}
+{% block title %}Catalogue{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Catalogue</h1><p>{{ books|length }} title{{ 's' if books|length != 1 }}{% if q or cat %} matching your filters{% endif %}</p></div>
+  <a class="btn primary" href="{{ url_for('book_form') }}">{{ ui.icon('plus') }}Add book</a>
+</div>
+
+<section class="panel">
+  <form class="toolbar" method="get">
+    <label class="search">{{ ui.icon('search') }}<input name="q" value="{{ q }}" placeholder="Search title, author or ISBN" aria-label="Search"></label>
+    <select name="cat" onchange="this.form.submit()" style="width:auto;height:34px" aria-label="Subject">
+      <option value="">All subjects</option>
+      {% for c in cats %}<option {{ 'selected' if c == cat }}>{{ c }}</option>{% endfor %}
+    </select>
+    {% if q or cat %}<a class="btn sm" href="{{ url_for('books') }}">Clear</a>{% endif %}
+  </form>
+  {% if books %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Book</th><th>Subject</th><th>ISBN</th><th class="num">Year</th><th class="num">Available</th><th></th></tr></thead>
+    <tbody>
+    {% for b in books %}
+      <tr>
+        <td><div class="book-cell">{{ ui.cover(b, 'sm') }}<span><b>{{ b.title }}</b><small>{{ b.author }}</small></span></div></td>
+        <td class="dim">{{ b.category or '—' }}</td>
+        <td class="dim nowrap">{{ b.isbn or '—' }}</td>
+        <td class="num dim">{{ b.year or '—' }}</td>
+        <td class="num nowrap"><b style="font-weight:600;color:{{ 'var(--danger)' if b.available == 0 else 'inherit' }}">{{ b.available }}</b><span class="dim"> / {{ b.copies }}</span></td>
+        <td class="actions">
+          <a class="icon-btn" href="{{ url_for('book_form', book_id=b.book_id) }}" title="Edit" aria-label="Edit {{ b.title }}">{{ ui.icon('edit') }}</a>
+          <form class="inline" method="post" action="{{ url_for('delete_book', book_id=b.book_id) }}" onsubmit="return confirm('Remove “{{ b.title }}” from the catalogue? Its loan history will also be deleted.')">
+            <button class="icon-btn danger" title="Remove" aria-label="Remove {{ b.title }}">{{ ui.icon('trash') }}</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}{{ ui.empty('No books found', 'Try a different search or subject.', 'search') }}{% endif %}
+</section>
+{% endblock %}

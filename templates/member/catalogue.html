@@ -1,0 +1,45 @@
+{% extends "app.html" %}
+{% import "macros.html" as ui %}
+{% block title %}Browse books{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Browse books</h1>
+  <p>{% if nav_overdue %}Borrowing is paused until you return your overdue book{{ 's' if nav_overdue > 1 }}. <a href="{{ url_for('my_loans') }}">Go to my loans</a>{% elif at_limit %}You're holding {{ MAX_LOANS }} books, the most allowed. Return one to borrow another.{% else %}You can borrow {{ MAX_LOANS - mine|length }} more book{{ 's' if MAX_LOANS - mine|length != 1 }}. Each loan lasts {{ LOAN_DAYS }} days.{% endif %}</p></div>
+</div>
+
+<section class="panel">
+  <form class="toolbar" method="get">
+    <label class="search">{{ ui.icon('search') }}<input name="q" value="{{ q }}" placeholder="Search by title or author" aria-label="Search"></label>
+    {% if cat %}<input type="hidden" name="cat" value="{{ cat }}">{% endif %}
+  </form>
+  <div class="toolbar">
+    <div class="chips">
+      <a href="{{ url_for('catalogue', q=q or None) }}" class="{{ 'on' if not cat }}">All</a>
+      {% for c in cats %}<a href="{{ url_for('catalogue', cat=c, q=q or None) }}" class="{{ 'on' if c == cat }}">{{ c }}</a>{% endfor %}
+    </div>
+  </div>
+  {% if books %}
+  <div class="shelf">
+    {% for b in books %}
+    <article class="book">
+      {{ ui.cover(b) }}
+      <h3>{{ b.title }}</h3>
+      <p>{{ b.author }}{% if b.year %} · {{ b.year }}{% endif %}</p>
+      <div class="foot">
+        <span class="avail {{ 'none' if b.available == 0 }}"><b>{{ b.available }}</b> of {{ b.copies }} available</span>
+        {% if b.book_id in mine %}
+          <span class="tag">{{ ui.icon('check') }}Borrowed</span>
+        {% elif b.available == 0 %}
+          <button class="btn sm" disabled>All out</button>
+        {% elif at_limit or nav_overdue %}
+          <button class="btn sm" disabled title="{{ 'Return your overdue book first' if nav_overdue else 'You have reached the borrowing limit' }}">Borrow</button>
+        {% else %}
+          <form class="inline" method="post" action="{{ url_for('member_borrow', book_id=b.book_id) }}"><button class="btn sm primary">Borrow</button></form>
+        {% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}{{ ui.empty('No books found', 'Try another title, author or subject.', 'search') }}{% endif %}
+</section>
+{% endblock %}

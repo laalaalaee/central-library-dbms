@@ -1,0 +1,26 @@
+{% extends "auth.html" %}
+{% import "macros.html" as ui %}
+{% block title %}Sign in{% endblock %}
+{% block content %}
+<h1>Sign in</h1>
+<p>Welcome back. Use your library account to continue.</p>
+<form method="post">
+  <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="username" required autofocus></div>
+  <div class="field"><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required></div>
+  <button class="btn primary block">Sign in</button>
+</form>
+<p class="auth-alt">New here? <a href="{{ url_for('register') }}">Create a member account</a></p>
+
+<div class="demo">
+  <span>Demo accounts. Click one to fill the form.</span>
+  <button type="button" data-email="admin@lib.com" data-pass="admin123"><span class="avatar">LB</span><span><b>Librarian</b><small>admin@lib.com</small></span></button>
+  <button type="button" data-email="aarav@student.edu" data-pass="member123"><span class="avatar">AS</span><span><b>Aarav Sharma, member</b><small>aarav@student.edu</small></span></button>
+</div>
+<script>
+document.querySelectorAll('.demo button').forEach(b => b.addEventListener('click', () => {
+  document.getElementById('email').value = b.dataset.email;
+  document.getElementById('password').value = b.dataset.pass;
+  document.querySelector('.btn.primary').focus();
+}));
+</script>
+{% endblock %}

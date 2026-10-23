@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% import "macros.html" as ui %}
+{% block page %}
+<div class="auth">
+  <section class="auth-art">
+    <div>
+      <a class="brand" href="{{ url_for('login') }}">{{ ui.icon('logo') }}<span><b>Central Library</b><small>Library Management System</small></span></a>
+    </div>
+    <div>
+      <h2>Every book, every member, every loan, in one place.</h2>
+      <p>Search the catalogue, borrow and return books, and let the librarian keep track of stock, due dates and fines.</p>
+      <div class="auth-figures">
+        <div><b>{{ figures.titles }}</b><span>titles</span></div>
+        <div><b>{{ figures.members }}</b><span>members</span></div>
+        <div><b>{{ figures.on_loan }}</b><span>books on loan</span></div>
+      </div>
+    </div>
+    <div class="spines" aria-hidden="true">
+      {% for h, c, w, tilt in [
+        (150,'#7a2e2e',26,0),(178,'#e4c98f',22,0),(132,'#355c66',30,0),(190,'#5b3a29',24,0),(160,'#86621f',28,0),
+        (120,'#d8d2c2',20,0),(172,'#6b3550',26,0),(146,'#2f6a55',32,0),(184,'#1f3b5a',24,0),(138,'#b56a45',22,0),
+        (166,'#4a4458',28,-9),(0,'',36,0),(154,'#7a2e2e',24,0),(176,'#e4c98f',20,0),(128,'#355c66',30,0),
+        (188,'#86621f',26,0),(150,'#5b3a29',22,0),(170,'#2f6a55',28,0),(140,'#d8d2c2',24,0),(182,'#6b3550',26,0),
+        (158,'#1f3b5a',30,0),(136,'#b56a45',22,0),(174,'#4a4458',26,0)] %}
+      {% if h %}<i style="--h:{{ h }}px;--c:{{ c }};--w:{{ w }}px;{% if tilt %}transform:rotate({{ tilt }}deg){% endif %}"></i>{% else %}<span style="width:{{ w }}px"></span>{% endif %}
+      {% endfor %}
+    </div>
+  </section>
+  <section class="auth-main">
+    <div class="auth-box">
+      {% include "flashes.html" %}
+      {% block content %}{% endblock %}
+    </div>
+  </section>
+</div>
+{% endblock %}

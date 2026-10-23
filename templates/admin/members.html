@@ -1,0 +1,37 @@
+{% extends "app.html" %}
+{% import "macros.html" as ui %}
+{% block title %}Members{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Members</h1><p>{{ members|length }} registered member{{ 's' if members|length != 1 }}</p></div>
+</div>
+
+<section class="panel">
+  <form class="toolbar" method="get">
+    <label class="search">{{ ui.icon('search') }}<input name="q" value="{{ q }}" placeholder="Search by name or email" aria-label="Search"></label>
+    {% if q %}<a class="btn sm" href="{{ url_for('members') }}">Clear</a>{% endif %}
+  </form>
+  {% if members %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Member</th><th>Joined</th><th class="num">On loan</th><th class="num">Total loans</th><th class="num">Fines (Rs)</th><th></th></tr></thead>
+    <tbody>
+    {% for m in members %}
+      <tr>
+        <td><div class="person"><span class="avatar">{{ m.name|initials }}</span><span><b>{{ m.name }}</b><small>{{ m.email }}</small></span></div></td>
+        <td class="dim nowrap">{{ m.joined_on|nice }}</td>
+        <td class="num">{{ m.active }}{% if m.overdue %} <span class="badge danger" style="margin-left:6px">{{ m.overdue }} overdue</span>{% endif %}</td>
+        <td class="num">{{ m.total }}</td>
+        <td class="num">{{ m.fines }}</td>
+        <td class="actions">
+          <a class="btn sm" href="{{ url_for('new_loan', user_id=m.user_id) }}">Issue book</a>
+          <form class="inline" method="post" action="{{ url_for('delete_member', user_id=m.user_id) }}" onsubmit="return confirm('Close {{ m.name }}\'s membership? Their loan history will be deleted.')">
+            <button class="icon-btn danger" title="Close membership" aria-label="Close membership for {{ m.name }}">{{ ui.icon('trash') }}</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}{{ ui.empty('No members found', 'Members appear here once they register.', 'users') }}{% endif %}
+</section>
+{% endblock %}

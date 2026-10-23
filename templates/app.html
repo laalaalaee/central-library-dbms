@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% import "macros.html" as ui %}
+{% block page %}
+{% set ep = request.endpoint %}
+<div class="shell">
+  <aside class="side">
+    <a class="brand" href="{{ url_for('home') }}">{{ ui.icon('logo') }}<span><b>Central Library</b><small>Library Management System</small></span></a>
+    <nav class="nav">
+      {% if session.role == 'admin' %}
+      <div class="nav-label">Librarian</div>
+      <a href="{{ url_for('overview') }}" class="{{ 'on' if ep == 'overview' }}">{{ ui.icon('grid') }}Overview</a>
+      <a href="{{ url_for('loans') }}" class="{{ 'on' if ep in ('loans', 'new_loan') }}">{{ ui.icon('swap') }}Circulation{% if nav_overdue %}<span class="count" title="Overdue loans">{{ nav_overdue }}</span>{% endif %}</a>
+      <a href="{{ url_for('books') }}" class="{{ 'on' if ep in ('books', 'book_form') }}">{{ ui.icon('book') }}Catalogue</a>
+      <a href="{{ url_for('members') }}" class="{{ 'on' if ep == 'members' }}">{{ ui.icon('users') }}Members</a>
+      {% else %}
+      <div class="nav-label">Member</div>
+      <a href="{{ url_for('catalogue') }}" class="{{ 'on' if ep == 'catalogue' }}">{{ ui.icon('book') }}Browse books</a>
+      <a href="{{ url_for('my_loans') }}" class="{{ 'on' if ep == 'my_loans' }}">{{ ui.icon('bookmark') }}My loans{% if nav_overdue %}<span class="count" title="Overdue">{{ nav_overdue }}</span>{% endif %}</a>
+      {% endif %}
+    </nav>
+    <div class="side-foot">
+      <span class="avatar">{{ session.name|initials }}</span>
+      <span class="who"><b>{{ session.name }}</b><span>{{ 'Librarian' if session.role == 'admin' else 'Member' }}</span></span>
+      <a href="{{ url_for('logout') }}" title="Sign out" aria-label="Sign out">{{ ui.icon('logout') }}</a>
+    </div>
+  </aside>
+  <main class="main">
+    {% include "flashes.html" %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+{% endblock %}

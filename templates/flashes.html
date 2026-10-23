@@ -1,0 +1,6 @@
+{% import "macros.html" as ui %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for cat, text in messages %}
+<div class="flash {{ cat }}" role="status">{{ ui.icon('check' if cat == 'ok' else 'alert') }}<span>{{ text }}</span></div>
+{% endfor %}
+{% endwith %}

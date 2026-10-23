@@ -1,0 +1,89 @@
+{% extends "app.html" %}
+{% import "macros.html" as ui %}
+{% block title %}Overview{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Overview</h1><p>{{ long_date }}</p></div>
+  <div style="display:flex;gap:8px">
+    <a class="btn" href="{{ url_for('book_form') }}">{{ ui.icon('plus') }}Add book</a>
+    <a class="btn primary" href="{{ url_for('new_loan') }}">{{ ui.icon('swap') }}Issue a book</a>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat"><span>Titles</span><b>{{ stats.titles }}</b></div>
+  <div class="stat"><span>Copies held</span><b>{{ stats.copies }}</b></div>
+  <div class="stat"><span>On loan now</span><b>{{ stats.on_loan }}</b></div>
+  <div class="stat {{ 'alert' if stats.overdue }}"><span>Overdue</span><b>{{ stats.overdue }}</b></div>
+  <div class="stat"><span>Members</span><b>{{ stats.members }}</b></div>
+  <div class="stat"><span>Fines recorded</span><b><small>Rs</small>{{ stats.fines }}</b></div>
+</div>
+
+<div class="cols">
+  <div class="stack">
+    <section class="panel">
+      <div class="panel-head"><h2>Overdue<span>{{ overdue|length }}</span></h2><a href="{{ url_for('loans', status='overdue') }}">View all</a></div>
+      {% if overdue %}
+      <div class="table-wrap"><table class="table"><tbody>
+        {% for i in overdue %}
+        <tr>
+          <td><div class="book-cell">{{ ui.cover(i, 'sm') }}<span><b>{{ i.title }}</b><small>{{ i.member }} · due {{ i.due_date|nice }}</small></span></div></td>
+          <td>{{ ui.state(i) }}</td>
+          <td class="actions"><form class="inline" method="post" action="{{ url_for('admin_return', issue_id=i.issue_id) }}"><button class="btn sm">Mark returned</button></form></td>
+        </tr>
+        {% endfor %}
+      </tbody></table></div>
+      {% else %}{{ ui.empty('Nothing overdue', 'Every book on loan is within its due date.', 'check') }}{% endif %}
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2>Coming due</h2><a href="{{ url_for('loans') }}">All loans</a></div>
+      {% if due_soon %}
+      <div class="table-wrap"><table class="table"><tbody>
+        {% for i in due_soon %}
+        <tr>
+          <td><div class="book-cell">{{ ui.cover(i, 'sm') }}<span><b>{{ i.title }}</b><small>{{ i.member }}</small></span></div></td>
+          <td class="nowrap dim">Due {{ i.due_date|nice }}</td>
+          <td class="actions">{{ ui.state(i) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody></table></div>
+      {% else %}{{ ui.empty('No books on loan') }}{% endif %}
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2>Loans by subject</h2></div>
+      <div class="bars">
+        {% set top = by_cat[0].loans if by_cat else 1 %}
+        {% for c in by_cat %}
+        <div class="bar"><span>{{ c.category or 'Uncategorised' }}</span><span class="bar-track"><span class="bar-fill" style="display:block;width:{{ (c.loans / top * 100)|round }}%"></span></span><span class="num">{{ c.loans }}</span></div>
+        {% else %}<p class="dim">No loans yet.</p>{% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <div class="stack">
+    <section class="panel">
+      <div class="panel-head"><h2>Recent activity</h2></div>
+      <ul class="list">
+        {% for a in activity %}
+        <li>
+          <span class="avatar">{{ a.member|initials }}</span>
+          <span class="grow"><b>{{ a.member }} {{ 'returned' if a.return_date else 'borrowed' }}</b><small>{{ a.title }}</small></span>
+          <small class="dim nowrap">{{ a.at|nice }}</small>
+        </li>
+        {% else %}<li class="dim">No activity yet.</li>{% endfor %}
+      </ul>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2>Most borrowed</h2></div>
+      <ul class="list">
+        {% for b in popular %}
+        <li><span class="rank">{{ loop.index }}</span>{{ ui.cover(b, 'sm') }}<span class="grow"><b>{{ b.title }}</b><small>{{ b.author }}</small></span><small class="dim nowrap">{{ b.loans }} loan{{ 's' if b.loans != 1 }}</small></li>
+        {% else %}<li class="dim">No loans yet.</li>{% endfor %}
+      </ul>
+    </section>
+  </div>
+</div>
+{% endblock %}

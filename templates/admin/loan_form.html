@@ -1,0 +1,29 @@
+{% extends "app.html" %}
+{% import "macros.html" as ui %}
+{% block title %}Issue a book{% endblock %}
+{% block content %}
+<a class="back" href="{{ url_for('loans') }}">{{ ui.icon('back') }}Circulation</a>
+<div class="page-head">
+  <div><h1>Issue a book</h1><p>The book is due back {{ LOAN_DAYS }} days from today. Members can hold up to {{ MAX_LOANS }} books.</p></div>
+</div>
+
+<form class="panel" method="post" style="max-width:720px">
+  <div class="form-grid">
+    <div class="f-6"><label for="user_id">Member</label>
+      <select id="user_id" name="user_id" required>
+        <option value="" disabled {{ 'selected' if not pick_user }}>Choose a member</option>
+        {% for m in members %}<option value="{{ m.user_id }}" {{ 'selected' if m.user_id == pick_user }}>{{ m.name }} ({{ m.email }})</option>{% endfor %}
+      </select></div>
+    <div class="f-6"><label for="book_id">Book</label>
+      <select id="book_id" name="book_id" required>
+        <option value="" disabled {{ 'selected' if not pick_book }}>Choose a book</option>
+        {% for b in books %}<option value="{{ b.book_id }}" {{ 'selected' if b.book_id == pick_book }}>{{ b.title }} · {{ b.author.split(',')[0] }} ({{ b.available }} available)</option>{% endfor %}
+      </select>
+      <div class="hint">Only books with a copy on the shelf are listed.</div></div>
+  </div>
+  <div class="form-foot">
+    <a class="btn" href="{{ url_for('loans') }}">Cancel</a>
+    <button class="btn primary">Issue book</button>
+  </div>
+</form>
+{% endblock %}
